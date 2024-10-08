@@ -52,7 +52,7 @@ const App = () => {
   return (
     <ScrollView style={styles.container}>
       {/* Logo */}
-      <Image source={require('./assets/logo.png')} style={styles.logo} />
+      <Image source={require('./assets/icon.png')} style={styles.logo} />
 
       <Text style={styles.title}>Add Menu Item</Text>
 
