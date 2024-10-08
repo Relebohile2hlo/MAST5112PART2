@@ -1,61 +1,51 @@
-// App.tsx
-
 import React, { useState } from 'react';
-import { View, Text, FlatList, TextInput, Button, ScrollView, Image, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-native';
 
-interface MenuItem {
-  id: number;
+type MenuItem = {
+  id: string;
   name: string;
   description: string;
   price: number;
-}
+  course: 'starter' | 'main' | 'dessert';
+};
 
-const App = () => {
+export default function App() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
+  const [course, setCourse] = useState('starter');
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [total, setTotal] = useState(0);
 
-  const addMenuItem = () => {
-    // Validate inputs
-    if (name.trim() === '') {
-      Alert.alert('Error', 'Please enter a dish name.');
-      return;
-    }
-    if (description.trim() === '') {
-      Alert.alert('Error', 'Please enter a description.');
-      return;
-    }
-    if (price.trim() === '' || isNaN(parseFloat(price))) {
-      Alert.alert('Error', 'Please enter a valid price.');
-      return;
-    }
-
+  const addItem = () => {
     const newItem: MenuItem = {
-      id: Math.random(), // Replace with a better unique ID generator
+      id: Math.random().toString(),
       name,
       description,
       price: parseFloat(price),
+      course: course as 'starter' | 'main' | 'dessert',
     };
-    setMenuItems([...menuItems, newItem]);
-    setTotal(total + newItem.price); // Update total price
-    resetInputs();
-  };
 
-  const resetInputs = () => {
+    setMenuItems((prevItems) => [...prevItems, newItem]);
+    setTotal((prevTotal) => prevTotal + newItem.price);
     setName('');
     setDescription('');
     setPrice('');
   };
 
+  const renderMenuItem = ({ item }: { item: MenuItem }) => (
+    <View style={styles.item}>
+      <Text style={styles.itemName}>{item.name} ({item.course})</Text>
+      <Text>{item.description}</Text>
+      <Text>Price: ${item.price.toFixed(2)}</Text>
+    </View>
+  );
+
   return (
-    <ScrollView style={styles.container}>
-      {/* Logo */}
-      <Image source={require('./assets/icon.png')} style={styles.logo} />
+    <View style={styles.container}>
+      <Text style={styles.title}>The Coastal Table Menu</Text>
 
-      <Text style={styles.title}>Add Menu Item</Text>
-
+      {/* Input fields for adding menu items */}
       <TextInput
         style={styles.input}
         placeholder="Dish Name"
@@ -71,87 +61,72 @@ const App = () => {
       <TextInput
         style={styles.input}
         placeholder="Price"
-        keyboardType="numeric"
         value={price}
         onChangeText={setPrice}
+        keyboardType="numeric"
       />
+      
+      {/* Course Selection */}
+      <View style={styles.buttonContainer}>
+        <Button title="Starter" onPress={() => setCourse('starter')} />
+        <Button title="Main" onPress={() => setCourse('main')} />
+        <Button title="Dessert" onPress={() => setCourse('dessert')} />
+      </View>
 
-      <Button title="Add Item" onPress={addMenuItem} />
+      {/* Add Item Button */}
+      <Button title="Add Item" onPress={addItem} />
 
-      <Text style={styles.title}>Menu Items</Text>
+      {/* List of added items */}
       <FlatList
         data={menuItems}
-        renderItem={({ item }) => (
-          <View style={styles.menuItem}>
-            <Text style={styles.itemName}>{item.name}</Text>
-            <Text style={styles.itemDescription}>{item.description}</Text>
-            <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
-          </View>
-        )}
-        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderMenuItem}
+        keyExtractor={(item) => item.id}
       />
 
+      {/* Total Price */}
       <Text style={styles.total}>Total: ${total.toFixed(2)}</Text>
-    </ScrollView>
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#f8f8f8',
-  },
-  logo: {
-    width: '100%',
-    height: 150, // Adjust height as needed
-    resizeMode: 'contain',
-    marginBottom: 16,
+    padding: 20,
+    backgroundColor: '#f8f9fa',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 20,
   },
   input: {
     height: 40,
-    borderColor: '#ccc',
+    borderColor: 'gray',
     borderWidth: 1,
-    marginBottom: 12,
-    paddingLeft: 8,
+    marginBottom: 10,
+    paddingHorizontal: 10,
   },
-  menuItem: {
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  item: {
+    backgroundColor: '#e9ecef',
     padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 5,
     marginVertical: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1,
-    elevation: 2,
   },
   itemName: {
-    fontSize: 18,
     fontWeight: 'bold',
-  },
-  itemDescription: {
-    fontSize: 14,
-    color: '#666',
-  },
-  itemPrice: {
-    fontSize: 16,
-    color: '#333',
-    marginTop: 4,
   },
   total: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginTop: 16,
+    marginTop: 20,
   },
 });
 
-export default App;
 
 
 
