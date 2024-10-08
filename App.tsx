@@ -8,19 +8,26 @@ const MenuScreen = () => {
   const [price, setPrice] = useState('');
   const [menuItems, setMenuItems] = useState([]);
 
+  // Function to add a menu item
   const addMenuItem = () => {
-    const newItem = {
-      dishName,
-      description,
-      course,
-      price,
-    };
-    setMenuItems([...menuItems, newItem]);
-    // Clear inputs
-    setDishName('');
-    setDescription('');
-    setCourse('');
-    setPrice('');
+    // Ensure that all fields are filled before adding
+    if (dishName && description && course && price) {
+      const newItem = {
+        dishName,
+        description,
+        course,
+        price,
+      };
+      setMenuItems([...menuItems, newItem]);
+      
+      // Clear inputs after adding the item
+      setDishName('');
+      setDescription('');
+      setCourse('');
+      setPrice('');
+    } else {
+      alert('Please fill all fields!'); // Alert if fields are empty
+    }
   };
 
   return (
@@ -66,7 +73,7 @@ const MenuScreen = () => {
             {item.dishName} - {item.description} ({item.course}) - ${item.price}
           </Text>
         )}
-        keyExtractor={(item) => item.dishName + item.price}
+        keyExtractor={(item, index) => index.toString()} // Use index for key extraction
       />
     </View>
   );
@@ -121,5 +128,6 @@ const styles = StyleSheet.create({
 });
 
 export default MenuScreen;
+
 
 
