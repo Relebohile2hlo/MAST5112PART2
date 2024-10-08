@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 
 const MenuScreen = () => {
   const [dishName, setDishName] = useState('');
@@ -52,7 +52,10 @@ const MenuScreen = () => {
         onChangeText={setPrice} 
         keyboardType="numeric" 
       />
-      <Button title="Add to Menu" onPress={addMenuItem} />
+      
+      <TouchableOpacity style={styles.button} onPress={addMenuItem}>
+        <Text style={styles.buttonText}>Add to Menu</Text>
+      </TouchableOpacity>
 
       <Text style={styles.totalCount}>Total Menu Items: {menuItems.length}</Text>
       
@@ -63,7 +66,7 @@ const MenuScreen = () => {
             {item.dishName} - {item.description} ({item.course}) - ${item.price}
           </Text>
         )}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item) => item.dishName + item.price}
       />
     </View>
   );
@@ -90,6 +93,17 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     backgroundColor: '#fff',
   },
+  button: {
+    backgroundColor: '#007BFF',
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
   totalCount: {
     fontSize: 18,
     marginVertical: 10,
@@ -107,4 +121,5 @@ const styles = StyleSheet.create({
 });
 
 export default MenuScreen;
+
 
