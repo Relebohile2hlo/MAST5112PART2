@@ -1,133 +1,159 @@
+// App.tsx
+
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TextInput, Button, ScrollView, Image, StyleSheet, Alert } from 'react-native';
 
-const MenuScreen = () => {
-  const [dishName, setDishName] = useState('');
+interface MenuItem {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+}
+
+const App = () => {
+  const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [course, setCourse] = useState('');
   const [price, setPrice] = useState('');
-  const [menuItems, setMenuItems] = useState([]);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  const [total, setTotal] = useState(0);
 
-  // Function to add a menu item
   const addMenuItem = () => {
-    // Ensure that all fields are filled before adding
-    if (dishName && description && course && price) {
-      const newItem = {
-        dishName,
-        description,
-        course,
-        price,
-      };
-      setMenuItems([...menuItems, newItem]);
-      
-      // Clear inputs after adding the item
-      setDishName('');
-      setDescription('');
-      setCourse('');
-      setPrice('');
-    } else {
-      alert('Please fill all fields!'); // Alert if fields are empty
+    // Validate inputs
+    if (name.trim() === '') {
+      Alert.alert('Error', 'Please enter a dish name.');
+      return;
     }
+    if (description.trim() === '') {
+      Alert.alert('Error', 'Please enter a description.');
+      return;
+    }
+    if (price.trim() === '' || isNaN(parseFloat(price))) {
+      Alert.alert('Error', 'Please enter a valid price.');
+      return;
+    }
+
+    const newItem: MenuItem = {
+      id: Math.random(), // Replace with a better unique ID generator
+      name,
+      description,
+      price: parseFloat(price),
+    };
+    setMenuItems([...menuItems, newItem]);
+    setTotal(total + newItem.price); // Update total price
+    resetInputs();
+  };
+
+  const resetInputs = () => {
+    setName('');
+    setDescription('');
+    setPrice('');
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Add Menu Item</Text>
-      
-      <TextInput 
-        style={styles.input} 
-        placeholder="Dish Name" 
-        value={dishName} 
-        onChangeText={setDishName} 
-      />
-      <TextInput 
-        style={styles.input} 
-        placeholder="Description" 
-        value={description} 
-        onChangeText={setDescription} 
-      />
-      <TextInput 
-        style={styles.input} 
-        placeholder="Course (Starters, Mains, Desserts)" 
-        value={course} 
-        onChangeText={setCourse} 
-      />
-      <TextInput 
-        style={styles.input} 
-        placeholder="Price" 
-        value={price} 
-        onChangeText={setPrice} 
-        keyboardType="numeric" 
-      />
-      
-      <TouchableOpacity style={styles.button} onPress={addMenuItem}>
-        <Text style={styles.buttonText}>Add to Menu</Text>
-      </TouchableOpacity>
+    <ScrollView style={styles.container}>
+      {/* Logo */}
+      <Image source={require('./assets/logo.png')} style={styles.logo} />
 
-      <Text style={styles.totalCount}>Total Menu Items: {menuItems.length}</Text>
-      
+      <Text style={styles.title}>Add Menu Item</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder="Dish Name"
+        value={name}
+        onChangeText={setName}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Description"
+        value={description}
+        onChangeText={setDescription}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Price"
+        keyboardType="numeric"
+        value={price}
+        onChangeText={setPrice}
+      />
+
+      <Button title="Add Item" onPress={addMenuItem} />
+
+      <Text style={styles.title}>Menu Items</Text>
       <FlatList
         data={menuItems}
         renderItem={({ item }) => (
-          <Text style={styles.menuItem}>
-            {item.dishName} - {item.description} ({item.course}) - ${item.price}
-          </Text>
+          <View style={styles.menuItem}>
+            <Text style={styles.itemName}>{item.name}</Text>
+            <Text style={styles.itemDescription}>{item.description}</Text>
+            <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
+          </View>
         )}
-        keyExtractor={(item, index) => index.toString()} // Use index for key extraction
+        keyExtractor={(item) => item.id.toString()}
       />
-    </View>
+
+      <Text style={styles.total}>Total: ${total.toFixed(2)}</Text>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 16,
     backgroundColor: '#f8f8f8',
   },
-  header: {
+  logo: {
+    width: '100%',
+    height: 150, // Adjust height as needed
+    resizeMode: 'contain',
+    marginBottom: 16,
+  },
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
+    marginBottom: 8,
   },
   input: {
     height: 40,
     borderColor: '#ccc',
     borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 15,
-    backgroundColor: '#fff',
-  },
-  button: {
-    backgroundColor: '#007BFF',
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  totalCount: {
-    fontSize: 18,
-    marginVertical: 10,
-    fontWeight: 'bold',
+    marginBottom: 12,
+    paddingLeft: 8,
   },
   menuItem: {
-    fontSize: 16,
-    marginVertical: 5,
     padding: 10,
     backgroundColor: '#fff',
     borderRadius: 5,
-    borderColor: '#ddd',
-    borderWidth: 1,
+    marginVertical: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1,
+    elevation: 2,
+  },
+  itemName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  itemDescription: {
+    fontSize: 14,
+    color: '#666',
+  },
+  itemPrice: {
+    fontSize: 16,
+    color: '#333',
+    marginTop: 4,
+  },
+  total: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 16,
   },
 });
 
-export default MenuScreen;
+export default App;
+
+
 
 
 
